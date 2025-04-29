@@ -16,10 +16,7 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${PORT_PLAYGROUND_API_INTERNAL}/version"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
+      <<: *default-healthcheck      
     networks:
       - app-network
 
@@ -34,10 +31,8 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
+      <<: *default-healthcheck
       test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
     networks:
       - app-network
 
@@ -74,7 +69,7 @@ services:
 
   kafka:
     image: bitnami/kafka:${VERSION_IMAGE_KAFKA}
-    container_name: serials-kafka-server
+    container_name: kafka-server
     ports:
       - ${PORT_KAFKA_INTERNAL}:${PORT_KAFKA_INTERNAL}
       - ${PORT_KAFKA_EXTERNAL}:${PORT_KAFKA_EXTERNAL}
@@ -96,7 +91,6 @@ services:
       <<: *default-healthcheck
       test: kafka-topics.sh --list --bootstrap-server kafka:${PORT_KAFKA_INTERNAL} || exit 1
 
-
   localstack:
     image: localstack/localstack:latest
     container_name: localstack
@@ -109,12 +103,43 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: ["CMD", "curl", "-f", "http://localhost:4566/"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
 
-
+  opensearch-ui:
+    image: opensearchproject/opensearch-dashboards:${VERSION_IMAGE_OPENSEARCH_UI}
+    container_name: opensearch-ui
+    ports:
+      - ${PORT_OPENSEARCH_UI}:5601
+    environment:
+      - 'OPENSEARCH_HOSTS=["http://opensearch-node:9200"]'
+      - "DISABLE_SECURITY_DASHBOARDS_PLUGIN=true"
+    depends_on:
+      opensearch-node:
+        condition: service_healthy
+  kafka-ui:
+    image: provectuslabs/kafka-ui:${VERSION_IMAGE_KAFKA_UI}
+    container_name: kafka-ui
+    ports:
+      - ${PORT_KAFKA_UI}:8080
+    environment:
+      DYNAMIC_CONFIG_ENABLED: 'true'
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_POLLING_POLLTIMEOUTMS: 15000
+      KAFKA_POLLING_PARTITIONPOLLTIMEOUT: 1000
+      KAFKA_POLLING_NODATAEMPTYPOLLS: 5
+    restart: unless-stopped
+    depends_on:
+      kafka:
+        condition: service_healthy
+  dynamodb-ui:
+    image: aaronshaf/dynamodb-admin:${VERSION_IMAGE_DYNAMODB_UI}
+    container_name: dynamodb-ui
+    ports:
+      - ${PORT_DYNAMODB_UI}:8001
+    environment:
+      DYNAMO_ENDPOINT: http://localstack:4566
+    depends_on:
+      localstack:
+        condition: service_healthy
 volumes:
   postgres_data:
   opensearch-data:
