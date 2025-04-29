@@ -1,0 +1,6 @@
+[submodule "api-playground"]
+	path = api-playground
+	url = https://github.com/BestBuy/api-playground.git
+[submodule "karate-tests"]
+	path = karate-tests
+	url = https://github.com/Woetohice/karate-tests.git

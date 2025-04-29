@@ -1,0 +1,57 @@
+services:
+  application-under-test:
+    image: api-playground
+    build:
+      context: ./api-playground
+      dockerfile: ./Dockerfile
+    ports:
+      - 3030:3030
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3030/version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - app-network
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=api_playground
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  karate-tests-runner:
+    image: karate-tests-runner
+    build:
+      context: ./karate-tests
+      dockerfile: Dockerfile
+    environment:
+      - API_BASE_URL=http://application-under-test:3030
+    depends_on:
+      application-under-test:
+        condition: service_healthy
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
