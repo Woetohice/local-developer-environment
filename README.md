@@ -24,11 +24,7 @@ A sandbox testing environment designed for API development and testing. This rep
    ./scripts/container-deploy.sh
    ```
 
-2. Install dependencies
-  ```bash
-  
-
-3. Configure your environment:
+2. Configure your environment:
    - Copy `.env.example` to `.env`
    - Update the environment variables as needed
 

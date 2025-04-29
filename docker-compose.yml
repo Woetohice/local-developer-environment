@@ -1,3 +1,8 @@
+x-default-healthcheck: &default-healthcheck
+  interval: ${HEALTHCHECK_INTERVAL}
+  retries: ${HEALTHCHECK_RETRIES}
+  start_period: ${HEALTHCHECK_START_PERIOD}
+  timeout: ${HEALTHCHECK_TIMEOUT}
 services:
   application-under-test:
     image: api-playground
@@ -5,12 +10,12 @@ services:
       context: ./api-playground
       dockerfile: ./Dockerfile
     ports:
-      - 3030:3030
+      - ${PORT_PLAYGROUND_API_INTERNAL}:${PORT_PLAYGROUND_API_EXTERNAL}
     depends_on:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3030/version"]
+      test: ["CMD", "curl", "-f", "http://localhost:${PORT_PLAYGROUND_API_INTERNAL}/version"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -19,13 +24,13 @@ services:
       - app-network
 
   postgres:
-    image: postgres:15-alpine
+    image: postgres:${VERSION_IMAGE_POSTGRES}
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=api_playground
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB_NAME}
     ports:
-      - "5432:5432"
+      - ${PORT_POSTGRES_INTERNAL}:${PORT_POSTGRES_EXTERNAL}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -42,16 +47,79 @@ services:
       context: ./karate-tests
       dockerfile: Dockerfile
     environment:
-      - API_BASE_URL=http://application-under-test:3030
+      - API_BASE_URL=http://application-under-test:${PORT_PLAYGROUND_API_INTERNAL}
     depends_on:
       application-under-test:
         condition: service_healthy
     networks:
       - app-network
 
+  opensearch-node:
+    image: opensearchproject/opensearch:${VERSION_IMAGE_OPENSEARCH}
+    container_name: opensearch-node
+    environment:
+      discovery.type: single-node
+      OPENSEARCH_JAVA_OPTS: -Xms1024m -Xmx1024m
+      DISABLE_INSTALL_DEMO_CONFIG: true
+      DISABLE_SECURITY_PLUGIN: true
+    restart: unless-stopped
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+    ports:
+      - ${PORT_OPENSEARCH_API}:9200
+      - ${PORT_OPENSEARCH_MONITORING}:9600
+    healthcheck:
+      <<: *default-healthcheck
+      test: curl --fail http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=50s || exit 1
+
+  kafka:
+    image: bitnami/kafka:${VERSION_IMAGE_KAFKA}
+    container_name: serials-kafka-server
+    ports:
+      - ${PORT_KAFKA_INTERNAL}:${PORT_KAFKA_INTERNAL}
+      - ${PORT_KAFKA_EXTERNAL}:${PORT_KAFKA_EXTERNAL}
+    environment:
+      KAFKA_CFG_NODE_ID: 0
+      KAFKA_CFG_PROCESS_ROLES: "controller,broker"
+      KAFKA_CFG_LISTENERS: "PLAINTEXT://:${PORT_KAFKA_INTERNAL},CONTROLLER://:9093,EXTERNAL://:${PORT_KAFKA_EXTERNAL}"
+      KAFKA_CFG_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:${PORT_KAFKA_INTERNAL},EXTERNAL://localhost:${PORT_KAFKA_EXTERNAL}"
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "0@kafka:9093"
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT"
+      KAFKA_CFG_MAX_REQUEST_SIZE: 769296129
+      KAFKA_HEAP_OPTS: "-Xmx2048m -Xms2048m"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+    volumes:
+      - kafka-data:/bitnami/kafka
+    restart: unless-stopped
+    healthcheck:
+      <<: *default-healthcheck
+      test: kafka-topics.sh --list --bootstrap-server kafka:${PORT_KAFKA_INTERNAL} || exit 1
+
+
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack
+    restart: unless-stopped
+    environment:
+      - SERVICES=s3,dynamodb
+      - AWS_DEFAULT_REGION=${AWS_REGION}
+    ports:
+      - "127.0.0.1:4566:4566"
+    healthcheck:
+      <<: *default-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:4566/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+
 volumes:
   postgres_data:
-
+  opensearch-data:
+  kafka-data:
+  
 networks:
   app-network:
     driver: bridge
