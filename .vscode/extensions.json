@@ -1,0 +1,15 @@
+{
+    // See http://go.microsoft.com/fwlink/?LinkId=827846
+    // for the documentation about the extensions.json format
+    "recommendations": [
+      "vscjava.vscode-java-pack",
+      "redhat.vscode-yaml",
+      "scala-lang.scala",
+      "kirkslota.karate-runner",
+      "EditorConfig.EditorConfig",
+      "oderwat.indent-rainbow",
+      "timonwong.shellcheck",
+      "esbenp.prettier-vscode",
+      "dandrii.gherkin-table-formatter"
+    ]
+  }

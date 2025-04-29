@@ -1,0 +1,20 @@
+{
+  "maven.executable.preferMavenWrapper" : true,
+  "karateRunner.buildDirectory.cleanBeforeEachRun": true,
+  "karateRunner.buildSystem.useWrapper": true,
+  "karateRunner.karateCli.overrideKarateRunner": true,
+  "karateRunner.reports.openAfterEachRun": false,
+  "karateRunner.karateRunner.promptToSpecify": false,
+  "karateRunner.tests.hideIgnored": true,
+  "karateRunner.tests.toTargetByGlob": "**/tests/**/*.feature",
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "java.compile.nullAnalysis.mode": "automatic",
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "**/node_modules": true,
+    "**/*.iml": true
+  },
+  "karateRunner.tests.activityBarDisplayType": "Tree"
+}

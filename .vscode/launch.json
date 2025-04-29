@@ -1,0 +1,22 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      
+      {
+        "type": "karate",
+        "name": "Debug Karate Test",
+        "request": "launch",
+        "feature": "${command:karateRunner.getDebugFile}",
+        "karateOptions": "",
+        "osx": {
+          "karateCli": "mvn test-compile exec:java -Dexec.mainClass=com.intuit.karate.cli.Main -Dexec.args=\"-d ${command:karateRunner.getDebugPort} ${command:karateRunner.getDebugFile}\" -Dexec.classpathScope=test"
+        },
+        "linux": {
+          "karateCli": "mvn test-compile exec:java -Dexec.mainClass=com.intuit.karate.cli.Main -Dexec.args=\"-d ${command:karateRunner.getDebugPort} ${command:karateRunner.getDebugFile}\" -Dexec.classpathScope=test"
+        },
+        "windows": {
+          "karateCli": "mvn test-compile exec:java -Dexec.mainClass=com.intuit.karate.cli.Main -Dexec.args=\"-d ${command:karateRunner.getDebugPort} ${command:karateRunner.getDebugFile}\" -Dexec.classpathScope=test"
+        }
+      }
+    ]
+}
