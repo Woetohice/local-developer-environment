@@ -20,8 +20,8 @@ A sandbox testing environment designed for API development and testing. This rep
 
 - Java 11 or higher
 - Docker desktop installed
+- github-desktop
 - VSCode (free) or Cursor (subscription required for Cursor)
-- Windows Services for Linux (if on windows)
 - Maven 3.9.9
   - https://maven.apache.org/download.html
   - `choco install maven` (if chocolatey installed)
