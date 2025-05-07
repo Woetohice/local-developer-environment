@@ -46,6 +46,8 @@ services:
     depends_on:
       application-under-test:
         condition: service_healthy
+    volumes:
+      - ./output/karate-reports:/app/target/karate-reports
     networks:
       - app-network
 
