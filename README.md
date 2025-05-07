@@ -33,9 +33,9 @@ A sandbox testing environment designed for API development and testing. This rep
 ## Setup
 
 1. Clone the repository:
-   a) open a terminal window (bash/cmd/powershell)
-   b) change directory to a location you are going to store your projects
-   c) enter the following command
+   * open a terminal window (bash/cmd/powershell)
+   * change directory to a location you are going to store your projects
+   * enter the following command
    ```
    git clone --recurse-submodules https://github.com/woetohice/local-developer-environment.git  
    ```
@@ -44,14 +44,14 @@ A sandbox testing environment designed for API development and testing. This rep
 3. Open Visual Studio Code
 4. Select "Open Folder..."
 5. Navigate to the local-developer-environment folder and click "select Folder"
-  a) you will be prompted to install a series of extension and add ons that are helpful.
+   * you will be prompted to install a series of extension and add ons that are helpful.
 6. Open the Terminal menu in VScode and select New Terminal
-   a) a new pane will appear at the bottom of the window.   click the V next to the plus and select "Git bash"
+   * a new pane will appear at the bottom of the window.   click the V next to the plus and select "Git bash"
 7. type ```scripts/container-deploy.sh```
-   a) The first time you run this, it will be downloading a lot of data, and may take up to 10 minutes to complete.
+   * The first time you run this, it will be downloading a lot of data, and may take up to 10 minutes to complete.
 8) switch to your Docker Deskop to verify the containers started
-   a) expand the local-developer-environment container
-   b) you should have 9 items inside of it
+   * expand the local-developer-environment container
+   * you should have 9 items inside of it
      * kafka-server
      * opensearch-node
      * postgres-1
@@ -61,7 +61,7 @@ A sandbox testing environment designed for API development and testing. This rep
      * dynamodb-ui
      * kafka-ui
      * localstack
-   c) click on Karate-tests-runner and you should see something along the lines of:
+   * click on Karate-tests-runner and you should see something along the lines of:
 ```
 2025-05-07 13:28:02 [INFO] Results:
 2025-05-07 13:28:02 [INFO] 
