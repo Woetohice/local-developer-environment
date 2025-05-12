@@ -1,0 +1,11 @@
+services:
+  localdeveloperenvironment:
+    image: localdeveloperenvironment
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      JAVA_OPTS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005,quiet=y
+    ports:
+      - 3030:3030
+      - 5005:5005
